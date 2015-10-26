@@ -4,7 +4,7 @@ where
 import Data.List
 import Data.List.Utils
 
---------------(   V  ,    X  ,    Y  )
+--------------(  V ,  X ,  Y )
 type Action = (Char, Int, Int)
 type Board = [Action]
 
@@ -64,20 +64,9 @@ readSymbol ('1' : ':' : letter : rest) = (letter, rest)
 readSymbol ('i' : num : 'e' : rest) = (num, rest)
 readSymbol str = error ("Invalid message. Unparsed content: " ++ str)
 
---readFirst :: String -> (Char, String)
---readFirst ( a : rest) = (a, rest)
-
---readNumber :: String -> (Char, String)
---readNumber str = 
---    let
---        num = takeWhile (/='e') str
---        left = drop (length num + 1) str
---    in (num, left)
-
 --could use standart lookup function
 match :: (Char -> Bool) -> [(Char, Char)] -> Char
 match mch [] = error ("Match not found.")
---match mch ((_,v) : rest) = match mch rest
 match mch ((b,v) : rest) = 
     if 
         mch b
@@ -95,15 +84,14 @@ winner message = if (length winners == 1) then Just (winners !! 0) else Nothing
     where
         mp = decode message
 
-        --xArrays = groupBy (\x y->(value x "x") == (value y "x")) (sortBy sortByX mp)
-        --yArrays = groupBy (\x y->(value x "y") == (value y "y")) (sortBy sortByY mp)
+        --xArrays = groupBy (\x y->(getX x) == (getX y)) (sortBy sortByX mp)
+        --yArrays = groupBy (\x y->(getY x) == (getY y)) (sortBy sortByY mp)
         xArray1 = mp >>= (\e -> if (getX e) == 0 then [e] else [])
         xArray2 = mp >>= (\e -> if (getX e) == 1 then [e] else [])
         xArray3 = mp >>= (\e -> if (getX e) == 2 then [e] else [])
         yArray1 = mp >>= (\e -> if (getY e) == 0 then [e] else [])
         yArray2 = mp >>= (\e -> if (getY e) == 1 then [e] else [])
         yArray3 = mp >>= (\e -> if (getY e) == 2 then [e] else [])
-
         xArrays = [xArray1, xArray2, xArray3]
         yArrays = [yArray1, yArray2, yArray3]
 
@@ -111,6 +99,7 @@ winner message = if (length winners == 1) then Just (winners !! 0) else Nothing
         diagon2Array = mp >>= (\e -> if (getX e == (3-(getY e))) then [e] else [])
 
         allArrays = merge xArrays $ merge yArrays [diagon1Array, diagon2Array]
+
         winners = allArrays >>= (\e -> if (length e == 3 && isWinner e) then [(getV (e !! 0))] else [])
 
 
@@ -119,10 +108,6 @@ isWinner mp = if (length grouped == 1) then True else False
     where
         grouped = groupBy (\a b->(getV a) == (getV b)) mp
 
---value :: Action -> Char -> Char
---value (v0,_,_) 'v' = v0
---value (_,v1,_) 'x' = v1
---value (_,_,v2) 'y' = v2
 
 getV :: Action -> Char
 getV (v0,_,_) = v0
